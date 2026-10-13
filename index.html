@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="MUMBAI ADS — Watch verified ads and earn rewards." />
+<title>MUMBAI ADS — User Panel</title>
+
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<style>
+  /* ============================================================
+     MUMBAI ADS — Design Tokens
+     ============================================================ */
+  :root {
+    --navy-900: #0a1128;
+    --navy-800: #101a36;
+    --navy-700: #162044;
+    --navy-600: #1e2b5a;
+    --navy-500: #273773;
+    --blue-400: #4f7cff;
+    --blue-300: #7ba0ff;
+    --blue-200: #a8c0ff;
+    --white: #ffffff;
+    --white-90: rgba(255,255,255,0.9);
+    --white-70: rgba(255,255,255,0.7);
+    --white-50: rgba(255,255,255,0.5);
+    --white-20: rgba(255,255,255,0.2);
+    --white-10: rgba(255,255,255,0.1);
+    --white-05: rgba(255,255,255,0.05);
+    --green-400: #34d399;
+    --green-500: #10b981;
+    --amber-400: #fbbf24;
+    --red-400: #f87171;
+    --red-500: #ef4444;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.45);
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font);
+    background: var(--navy-900);
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(79,124,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(79,124,255,0.08) 0%, transparent 60%);
+    min-height: 100vh;
+  }
+
+  /* ============================================================
+     Utility
+     ============================================================ */
+  .hidden { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+  /* ============================================================
+     Loading Screen
+     ============================================================ */
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--navy-900);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  #loading-screen.fade-out { opacity: 0; visibility: hidden; }
+  .loader-ring {
+    width: 48px; height: 48px;
+    border: 3px solid var(--white-20);
+    border-top-color: var(--blue-400);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-size: 14px; color: var(--white-70);
+    letter-spacing: 0.5px;
+  }
+
+  /* ============================================================
+     Auth Screen
+     ============================================================ */
+  #auth-screen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .auth-card {
+    width: 100%; max-width: 420px;
+    background: linear-gradient(145deg, var(--navy-800), var(--navy-700));
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-xl);
+    padding: 48px 36px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    animation: cardIn 0.5s ease-out;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .auth-logo {
+    width: 64px; height: 64px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800;
+    box-shadow: 0 8px 32px rgba(79,124,255,0.35);
+  }
+  .auth-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .auth-subtitle { font-size: 14px; color: var(--white-70); margin-bottom: 32px; line-height: 1.5; }
+  .google-btn {
+    width: 100%; padding: 14px 20px;
+    background: var(--white); color: var(--navy-900);
+    border: none; border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 600; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; gap: 12px;
+    transition: var(--transition);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .google-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .google-btn:active { transform: translateY(0); }
+  .google-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .google-btn svg { width: 20px; height: 20px; }
+
+  .auth-note {
+    margin-top: 24px; font-size: 12px; color: var(--white-50);
+    line-height: 1.6;
+  }
+
+  /* ============================================================
+     Dashboard Layout
+     ============================================================ */
+  #dashboard { min-height: 100vh; padding-bottom: 84px; }
+
+  .top-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,17,40,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--white-10);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 12px; }
+  .top-bar-logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800;
+  }
+  .top-bar-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .top-bar-right { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--white-10); border: 1px solid var(--white-10);
+    color: var(--white-90); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .icon-btn:hover { background: var(--white-20); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .container { max-width: 640px; margin: 0 auto; padding: 20px; }
+
+  /* ============================================================
+     Welcome Card
+     ============================================================ */
+  .welcome-card {
+    background: linear-gradient(145deg, var(--navy-700), var(--navy-600));
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-md);
+  }
+  .welcome-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--blue-400);
+    object-fit: cover; flex-shrink: 0;
+  }
+  .welcome-info { flex: 1; min-width: 0; }
+  .welcome-name { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .welcome-email { font-size: 13px; color: var(--white-50); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ============================================================
+     Stats Grid
+     ============================================================ */
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--navy-800);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    transition: var(--transition);
+  }
+  .stat-card:hover { border-color: var(--blue-400); }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--white-50); margin-bottom: 8px; }
+  .stat-value { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+  .stat-value.blue { color: var(--blue-300); }
+  .stat-value.green { color: var(--green-400); }
+  .stat-value.amber { color: var(--amber-400); }
+
+  /* ============================================================
+     Ad Card
+     ============================================================ */
+  .ad-card {
+    background: linear-gradient(145deg, var(--navy-700), var(--navy-600));
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    padding: 28px 22px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .ad-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(79,124,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .ad-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(79,124,255,0.15);
+    border: 1px solid rgba(79,124,255,0.3);
+    color: var(--blue-300);
+    font-size: 11px; font-weight: 600;
+    padding: 5px 12px; border-radius: 100px;
+    margin-bottom: 16px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .ad-badge svg { width: 12px; height: 12px; }
+  .ad-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .ad-desc { font-size: 14px; color: var(--white-70); line-height: 1.6; margin-bottom: 20px; }
+  .ad-reward {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--green-400);
+    margin-bottom: 20px;
+  }
+  .ad-reward svg { width: 16px; height: 16px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 14px 24px;
+    border: none; border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 600; font-family: var(--font);
+    cursor: pointer; transition: var(--transition);
+    text-decoration: none; width: 100%;
+  }
+  .btn svg { width: 18px; height: 18px; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue-400), var(--blue-300));
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(79,124,255,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,124,255,0.45); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary {
+    background: var(--white-10); color: var(--white-90);
+    border: 1px solid var(--white-20);
+  }
+  .btn-secondary:hover { background: var(--white-20); }
+  .btn-danger {
+    background: rgba(239,68,68,0.15); color: var(--red-400);
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-wallet {
+    background: linear-gradient(135deg, var(--green-500), var(--green-400));
+    color: var(--navy-900);
+    box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+  }
+  .btn-wallet:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16,185,129,0.4); }
+
+  .ad-limit-note {
+    font-size: 12px; color: var(--white-50); margin-top: 14px;
+    line-height: 1.5;
+  }
+
+  /* ============================================================
+     Bottom Navigation
+     ============================================================ */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,17,40,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--white-10);
+    display: flex; justify-content: space-around;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 6px 16px;
+    background: none; border: none; color: var(--white-50);
+    font-size: 11px; font-weight: 500; font-family: var(--font);
+    cursor: pointer; transition: var(--transition);
+    border-radius: var(--radius-sm);
+  }
+  .nav-item.active { color: var(--blue-300); }
+  .nav-item:hover { color: var(--white-90); }
+  .nav-item svg { width: 20px; height: 20px; }
+
+  /* ============================================================
+     Sections
+     ============================================================ */
+  .section { display: none; animation: sectionIn 0.25s ease; }
+  .section.active { display: block; }
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.3px; }
+
+  /* ============================================================
+     Transaction List
+     ============================================================ */
+  .tx-list { display: flex; flex-direction: column; gap: 10px; }
+  .tx-item {
+    background: var(--navy-800);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .tx-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tx-icon.credit { background: rgba(16,185,129,0.15); color: var(--green-400); }
+  .tx-icon.debit { background: rgba(239,68,68,0.15); color: var(--red-400); }
+  .tx-icon.pending { background: rgba(251,191,36,0.15); color: var(--amber-400); }
+  .tx-icon svg { width: 18px; height: 18px; }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .tx-meta { font-size: 12px; color: var(--white-50); }
+  .tx-amount { font-size: 15px; font-weight: 700; text-align: right; }
+  .tx-amount.credit { color: var(--green-400); }
+  .tx-amount.debit { color: var(--red-400); }
+  .tx-status {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 3px 8px; border-radius: 100px; font-weight: 600;
+    margin-top: 4px; display: inline-block;
+  }
+  .tx-status.pending { background: rgba(251,191,36,0.15); color: var(--amber-400); }
+  .tx-status.approved { background: rgba(16,185,129,0.15); color: var(--green-400); }
+  .tx-status.paid { background: rgba(16,185,129,0.2); color: var(--green-400); }
+  .tx-status.rejected { background: rgba(239,68,68,0.15); color: var(--red-400); }
+
+  /* ============================================================
+     Empty / Error States
+     ============================================================ */
+  .empty-state {
+    text-align: center; padding: 48px 24px;
+    color: var(--white-50);
+  }
+  .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  .error-banner {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    color: var(--red-400);
+    font-size: 13px; line-height: 1.5;
+    margin-bottom: 16px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .error-banner svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+  .error-banner .close { margin-left: auto; background: none; border: none; color: inherit; cursor: pointer; padding: 0; }
+
+  /* ============================================================
+     Withdrawal Form
+     ============================================================ */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--white-70); margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%; padding: 14px 16px;
+    background: var(--navy-800);
+    border: 1px solid var(--white-20);
+    border-radius: var(--radius-md);
+    color: var(--white); font-size: 15px; font-family: var(--font);
+    transition: var(--transition);
+  }
+  .form-input:focus { outline: none; border-color: var(--blue-400); box-shadow: 0 0 0 3px rgba(79,124,255,0.15); }
+  .form-input.error { border-color: var(--red-400); }
+  .form-hint { font-size: 12px; color: var(--white-50); margin-top: 6px; }
+  .form-error { font-size: 12px; color: var(--red-400); margin-top: 6px; display: none; }
+  .form-error.show { display: block; }
+
+  /* ============================================================
+     Modal / Drawer
+     ============================================================ */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+  .modal-overlay.open { opacity: 1; visibility: visible; }
+  .modal-sheet {
+    width: 100%; max-width: 640px;
+    background: var(--navy-800);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 24px 20px 32px;
+    max-height: 85vh; overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-overlay.open .modal-sheet { transform: translateY(0); }
+  .modal-handle {
+    width: 40px; height: 4px; border-radius: 100px;
+    background: var(--white-20);
+    margin: 0 auto 20px;
+  }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+
+  /* ============================================================
+     Toast
+     ============================================================ */
+  #toast-container {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    z-index: 300; display: flex; flex-direction: column; gap: 8px;
+    width: calc(100% - 40px); max-width: 400px; pointer-events: none;
+  }
+  .toast {
+    background: var(--navy-700);
+    border: 1px solid var(--white-20);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 10px;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.3s ease;
+    pointer-events: all;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .toast.success { border-left: 3px solid var(--green-400); }
+  .toast.error { border-left: 3px solid var(--red-400); }
+  .toast.info { border-left: 3px solid var(--blue-400); }
+  .toast svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+  .toast.success svg { color: var(--green-400); }
+  .toast.error svg { color: var(--red-400); }
+  .toast.info svg { color: var(--blue-300); }
+  .toast p { font-size: 13px; line-height: 1.5; }
+
+  /* ============================================================
+     Settings Panel
+     ============================================================ */
+  .settings-profile {
+    display: flex; align-items: center; gap: 14px;
+    padding-bottom: 20px; margin-bottom: 20px;
+    border-bottom: 1px solid var(--white-10);
+  }
+  .settings-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 2px solid var(--blue-400); object-fit: cover;
+  }
+  .settings-name { font-size: 16px; font-weight: 700; }
+  .settings-email { font-size: 13px; color: var(--white-50); }
+  .settings-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--white-05);
+    font-size: 14px;
+  }
+  .settings-row .label { color: var(--white-70); }
+  .settings-row .value { font-weight: 600; text-align: right; max-width: 60%; }
+  .settings-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 0; color: var(--blue-300);
+    font-size: 14px; font-weight: 500;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font); width: 100%; text-align: left;
+    border-bottom: 1px solid var(--white-05);
+  }
+  .settings-link:hover { color: var(--blue-200); }
+  .settings-link svg { width: 18px; height: 18px; }
+
+  /* ============================================================
+     Responsive
+     ============================================================ */
+  @media (min-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .container { padding: 28px; }
+    .auth-card { padding: 56px 44px; }
+    .bottom-nav { display: none; }
+    #dashboard { padding-bottom: 0; }
+    .desktop-nav {
+      display: flex; gap: 4px; margin-left: 32px;
+    }
+    .desktop-nav button {
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      background: none; border: none; color: var(--white-50);
+      font-size: 14px; font-weight: 500; font-family: var(--font);
+      cursor: pointer; transition: var(--transition);
+    }
+    .desktop-nav button.active { color: var(--blue-300); background: var(--white-10); }
+    .desktop-nav button:hover { color: var(--white-90); }
+  }
+  @media (max-width: 767px) {
+    .desktop-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOADING SCREEN
+     ============================================================ -->
+<div id="loading-screen">
+  <div class="loader-ring"></div>
+  <p class="loader-text" id="loading-text">Connecting to MUMBAI ADS…</p>
+</div>
+
+<!-- ============================================================
+     AUTH SCREEN
+     ============================================================ -->
+<div id="auth-screen" class="hidden">
+  <div class="auth-card">
+    <div class="auth-logo">M</div>
+    <h1 class="auth-title">MUMBAI ADS</h1>
+    <p class="auth-subtitle">Watch verified advertisements and earn rewards. Your balance is secure and server-verified.</p>
+
+    <button class="google-btn" id="google-sign-in-btn">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+        <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+        <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+        <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+      </svg>
+      <span id="google-btn-text">Continue with Google</span>
+    </button>
+
+    <p class="auth-note">
+      By continuing, you agree to our Terms and Privacy Policy. Your Google account is used only for authentication. MUMBAI ADS never sees your password.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================
+     DASHBOARD
+     ============================================================ -->
+<div id="dashboard" class="hidden">
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">M</div>
+      <span class="top-bar-title">MUMBAI ADS</span>
+      <nav class="desktop-nav" id="desktop-nav">
+        <button data-section="home" class="active">Home</button>
+        <button data-section="wallet">Wallet</button>
+        <button data-section="withdrawals">Withdrawals</button>
+      </nav>
+    </div>
+    <div class="top-bar-right">
+      <button class="icon-btn" id="settings-btn" aria-label="Settings">
+        <i data-lucide="settings"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Error Banner -->
+    <div id="global-error" class="error-banner hidden">
+      <i data-lucide="alert-circle"></i>
+      <span id="global-error-text"></span>
+      <button class="close" onclick="document.getElementById('global-error').classList.add('hidden')">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+
+    <!-- ==================== HOME SECTION ==================== -->
+    <section id="section-home" class="section active">
+
+      <!-- Welcome -->
+      <div class="welcome-card">
+        <img id="user-avatar" class="welcome-avatar" src="" alt="Profile" />
+        <div class="welcome-info">
+          <div class="welcome-name" id="user-name">—</div>
+          <div class="welcome-email" id="user-email">—</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Wallet Balance</div>
+          <div class="stat-value blue" id="stat-balance">₹0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Earned</div>
+          <div class="stat-value green" id="stat-earned">₹0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ads Today</div>
+          <div class="stat-value" id="stat-ads-today">0 / 3</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Next Eligible</div>
+          <div class="stat-value amber" id="stat-next-eligible" style="font-size:15px;">Ready</div>
+        </div>
+      </div>
+
+      <!-- Ad Card -->
+      <div class="ad-card" id="ad-card">
+        <div class="ad-badge">
+          <i data-lucide="play-circle"></i>
+          <span>Rewarded Ad</span>
+        </div>
+        <h2 class="ad-title" id="ad-title">Loading campaign…</h2>
+        <p class="ad-desc" id="ad-desc">Please wait while we fetch an available advertisement.</p>
+        <div class="ad-reward">
+          <i data-lucide="gift"></i>
+          <span id="ad-reward-text">Earn ₹100.00 per verified view</span>
+        </div>
+        <button class="btn btn-primary" id="view-ad-btn" disabled>
+          <i data-lucide="external-link"></i>
+          <span>Start Advertisement</span>
+        </button>
+        <p class="ad-limit-note" id="ad-limit-note">
+          Max 3 rewarded ads per day. Minimum 4 hours between completions.
+        </p>
+      </div>
+
+      <!-- Quick Withdraw -->
+      <button class="btn btn-wallet" id="quick-withdraw-btn">
+        <i data-lucide="wallet"></i>
+        <span>Withdraw Funds</span>
+      </button>
+
+    </section>
+
+    <!-- ==================== WALLET SECTION ==================== -->
+    <section id="section-wallet" class="section">
+      <h2 class="section-title">Wallet</h2>
+
+      <div class="stats-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="stat-card">
+          <div class="stat-label">Available</div>
+          <div class="stat-value blue" id="wallet-available">₹0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reserved</div>
+          <div class="stat-value amber" id="wallet-reserved">₹0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Earned</div>
+          <div class="stat-value green" id="wallet-earned">₹0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Withdrawn</div>
+          <div class="stat-value" id="wallet-withdrawn">₹0.00</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:15px;font-weight:700;margin:24px 0 12px;">Reward Transactions</h3>
+      <div class="tx-list" id="reward-tx-list">
+        <div class="empty-state">
+          <i data-lucide="inbox"></i>
+          <p>No reward transactions yet. Complete an ad to earn your first reward.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== WITHDRAWALS SECTION ==================== -->
+    <section id="section-withdrawals" class="section">
+      <h2 class="section-title">Withdrawals</h2>
+
+      <div class="stat-card" style="margin-bottom:20px;">
+        <div class="stat-label">Available Balance</div>
+        <div class="stat-value blue" id="withdraw-available">₹0.00</div>
+      </div>
+
+      <button class="btn btn-primary" id="open-withdraw-form-btn" style="margin-bottom:24px;">
+        <i data-lucide="plus-circle"></i>
+        <span>New Withdrawal Request</span>
+      </button>
+
+      <h3 style="font-size:15px;font-weight:700;margin:0 0 12px;">Withdrawal History</h3>
+      <div class="tx-list" id="withdrawal-list">
+        <div class="empty-state">
+          <i data-lucide="inbox"></i>
+          <p>No withdrawal requests yet. Minimum withdrawal is ₹2,000.00.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation (Mobile) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-section="home">
+      <i data-lucide="home"></i>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-section="wallet">
+      <i data-lucide="wallet"></i>
+      <span>Wallet</span>
+    </button>
+    <button class="nav-item" data-section="withdrawals">
+      <i data-lucide="arrow-up-circle"></i>
+      <span>Withdraw</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ============================================================
+     SETTINGS MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Settings</h2>
+
+    <div class="settings-profile">
+      <img id="settings-avatar" class="settings-avatar" src="" alt="Profile" />
+      <div>
+        <div class="settings-name" id="settings-name">—</div>
+        <div class="settings-email" id="settings-email">—</div>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <span class="label">Account Created</span>
+      <span class="value" id="settings-created">—</span>
+    </div>
+    <div class="settings-row">
+      <span class="label">Account Status</span>
+      <span class="value" id="settings-status">Active</span>
+    </div>
+
+    <button class="settings-link" id="settings-privacy-btn">
+      <i data-lucide="shield"></i>
+      <span>Privacy Information</span>
+    </button>
+    <button class="settings-link" id="settings-terms-btn">
+      <i data-lucide="file-text"></i>
+      <span>Terms & Conditions</span>
+    </button>
+    <button class="settings-link" id="settings-support-btn">
+      <i data-lucide="mail"></i>
+      <span>Support Contact</span>
+    </button>
+
+    <button class="btn btn-danger" id="sign-out-btn" style="margin-top:24px;">
+      <i data-lucide="log-out"></i>
+      <span>Sign Out</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     WITHDRAWAL FORM MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="withdraw-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Withdrawal Request</h2>
+
+    <div id="withdraw-error" class="error-banner hidden">
+      <i data-lucide="alert-circle"></i>
+      <span id="withdraw-error-text"></span>
+    </div>
+
+    <form id="withdraw-form">
+      <div class="form-group">
+        <label class="form-label" for="wd-amount">Amount (₹)</label>
+        <input class="form-input" type="number" id="wd-amount" min="2000" max="10000" step="0.01" placeholder="2000.00" required />
+        <div class="form-hint">Minimum ₹2,000.00 — Maximum ₹10,000.00</div>
+        <div class="form-error" id="wd-amount-error">Please enter a valid amount between ₹2,000 and ₹10,000.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wd-upi">UPI ID</label>
+        <input class="form-input" type="text" id="wd-upi" placeholder="yourname@okicici" required />
+        <div class="form-hint">Format: identifier@handle (e.g., name@paytm, 9876543210@ybl)</div>
+        <div class="form-error" id="wd-upi-error">Please enter a valid UPI ID.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wd-holder">UPI Account Holder Name</label>
+        <input class="form-input" type="text" id="wd-holder" placeholder="As per bank records" required />
+        <div class="form-error" id="wd-holder-error">Please enter the account holder name.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="wd-mobile">Mobile Number</label>
+        <input class="form-input" type="tel" id="wd-mobile" placeholder="9876543210" maxlength="10" required />
+        <div class="form-error" id="wd-mobile-error">Please enter a valid 10-digit Indian mobile number.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="wd-submit-btn">
+        <i data-lucide="send"></i>
+        <span>Submit Request</span>
+      </button>
+    </form>
+
+    <p style="font-size:12px;color:var(--white-50);margin-top:16px;line-height:1.6;">
+      Your requested amount will be reserved immediately. Payment is processed manually by an administrator after review. Approval and payment are separate steps.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONFIRMATION MODAL
+     ============================================================ -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal-sheet" style="text-align:center;">
+    <div class="modal-handle"></div>
+    <div style="width:64px;height:64px;border-radius:50%;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i data-lucide="check-circle" style="width:32px;height:32px;color:var(--green-400);"></i>
+    </div>
+    <h2 class="modal-title" id="confirm-title">Request Submitted</h2>
+    <p style="font-size:14px;color:var(--white-70);line-height:1.6;margin-bottom:24px;" id="confirm-message">
+      Your withdrawal request has been received and is pending review.
+    </p>
+    <button class="btn btn-primary" id="confirm-close-btn">Done</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     FIREBASE MODULAR SDK (ESM via CDN)
+     ============================================================ -->
+<script type="module">
+  // ---- Firebase Imports ----
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, GoogleAuthProvider,
+    signInWithPopup, signOut
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  import {
+    getDatabase, ref, onValue, get, query, orderByChild, limitToLast
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+  import {
+    getFunctions, httpsCallable
+  } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js";
+  // App Check — requires reCAPTCHA v3 site key from Firebase Console.
+  // Uncomment after configuring App Check:
+  // import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check.js";
+
+  // ============================================================
+  // FIREBASE CONFIGURATION
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyAjlTlg8m3W_UZ0xfHh6UPrBw_GjQvl8b0",
+    authDomain: "aura-ads-37b71.firebaseapp.com",
+    databaseURL: "https://aura-ads-37b71-default-rtdb.firebaseio.com",
+    projectId: "aura-ads-37b71",
+    storageBucket: "aura-ads-37b71.firebasestorage.app",
+    messagingSenderId: "1087815776957",
+    appId: "1:1087815776957:web:e81c9f67a4a20a47b295d4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  const functions = getFunctions(app);
+
+  // App Check initialization (uncomment after registering reCAPTCHA v3 key):
+  // initializeAppCheck(app, {
+  //   provider: new ReCaptchaV3Provider('YOUR_RECAPTCHA_V3_SITE_KEY'),
+  //   isTokenAutoRefreshEnabled: true
+  // });
+
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+  // ============================================================
+  // GLOBAL STATE
+  // ============================================================
+  let currentUser = null;
+  let userProfile = null;
+  let activeCampaign = null;
+  let unsubscribers = [];
+  let attemptListenerActive = false;
+
+  // ============================================================
+  // DOM HELPERS
+  // ============================================================
+  const $ = (id) => document.getElementById(id);
+  const loadingScreen = $('loading-screen');
+  const authScreen = $('auth-screen');
+  const dashboard = $('dashboard');
+
+  function showLoading(text = 'Loading…') {
+    $('loading-text').textContent = text;
+    loadingScreen.classList.remove('fade-out');
+  }
+  function hideLoading() {
+    loadingScreen.classList.add('fade-out');
+  }
+  function showDashboard() {
+    authScreen.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+    lucide.createIcons();
+  }
+  function showAuth() {
+    authScreen.classList.remove('hidden');
+    dashboard.classList.add('hidden');
+  }
+
+  // ============================================================
+  // FORMATTING
+  // ============================================================
+  function formatINR(amount) {
+    const num = Number(amount) || 0;
+    return '₹' + num.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+  function formatDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+  function formatDateTime(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+  function timeAgo(ts) {
+    if (!ts) return '—';
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+
+  // ============================================================
+  // TOAST NOTIFICATIONS
+  // ============================================================
+  function showToast(message, type = 'info') {
+    const container = $('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icons = { success: 'check-circle', error: 'alert-circle', info: 'info' };
+    toast.innerHTML = `<i data-lucide="${icons[type] || 'info'}"></i><p>${message}</p>`;
+    container.appendChild(toast);
+    lucide.createIcons();
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-12px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+
+  // ============================================================
+  // ERROR HANDLING
+  // ============================================================
+  function showGlobalError(msg) {
+    $('global-error-text').textContent = msg;
+    $('global-error').classList.remove('hidden');
+    lucide.createIcons();
+  }
+  function clearGlobalError() {
+    $('global-error').classList.add('hidden');
+  }
+
+  function handleFirebaseError(err, context) {
+    console.error(`[MUMBAI ADS] ${context}:`, err);
+    const code = err?.code || '';
+    const messages = {
+      'auth/popup-blocked': 'Sign-in popup was blocked. Please allow popups for this site.',
+      'auth/popup-closed-by-user': 'Sign-in was cancelled. Please try again.',
+      'auth/cancelled-popup-request': 'Another sign-in is already in progress.',
+      'auth/unauthorized-domain': 'This domain is not authorized for sign-in. Contact support.',
+      'auth/network-request-failed': 'Network error. Please check your connection.',
+      'auth/internal-error': 'Authentication service error. Please try again.',
+      'PERMISSION_DENIED': 'Permission denied. You may not have access to this data.',
+      'functions/unauthenticated': 'Please sign in to continue.',
+      'functions/permission-denied': 'You are not authorized for this action.',
+      'functions/not-found': 'The requested service is not available.',
+      'functions/internal': 'Server error. Please try again later.',
+      'functions/deadline-exceeded': 'Request timed out. Please try again.'
+    };
+    return messages[code] || messages[err?.message] || 'An unexpected error occurred. Please try again.';
+  }
+
+  // ============================================================
+  // AUTHENTICATION
+  // ============================================================
+  async function signInWithGoogle() {
+    const btn = $('google-sign-in-btn');
+    const btnText = $('google-btn-text');
+    btn.disabled = true;
+    btnText.textContent = 'Signing in…';
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      // onAuthStateChanged will handle the rest.
+    } catch (err) {
+      showToast(handleFirebaseError(err, 'Google Sign-In'), 'error');
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'Continue with Google';
+    }
+  }
+
+  async function handleSignOut() {
+    try {
+      // Clean up listeners
+      unsubscribers.forEach(unsub => { try { unsub(); } catch(e){} });
+      unsubscribers = [];
+      attemptListenerActive = false;
+      await signOut(auth);
+      showToast('Signed out successfully.', 'info');
+    } catch (err) {
+      showToast(handleFirebaseError(err, 'Sign Out'), 'error');
+    }
+  }
+
+  // ============================================================
+  // USER PROFILE
+  // ============================================================
+  async function loadUserProfile(uid) {
+    // Attempt to read user profile from Realtime Database.
+    // The backend (Cloud Function) should create this on first sign-in.
+    const userRef = ref(db, `users/${uid}`);
+    try {
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        userProfile = snapshot.val();
+        return userProfile;
+      } else {
+        // Profile does not exist — the Cloud Function trigger should have created it.
+        // We show a helpful message instead of silently failing.
+        console.warn('[MUMBAI ADS] User profile record not found. Backend onCreate trigger may not be deployed.');
+        return null;
+      }
+    } catch (err) {
+      const msg = handleFirebaseError(err, 'Load Profile');
+      showGlobalError(msg);
+      return null;
+    }
+  }
+
+  function renderUserProfile() {
+    if (!userProfile) return;
+    const name = userProfile.displayName || 'User';
+    const email = userProfile.email || '';
+    const photo = userProfile.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=1e2b5a&color=fff';
+
+    $('user-avatar').src = photo;
+    $('user-name').textContent = name;
+    $('user-email').textContent = email;
+    $('settings-avatar').src = photo;
+    $('settings-name').textContent = name;
+    $('settings-email').textContent = email;
+    $('settings-created').textContent = formatDate(userProfile.createdAt);
+    $('settings-status').textContent = userProfile.accountStatus || 'active';
+  }
+
+  // ============================================================
+  // REALTIME DATABASE LISTENERS
+  // ============================================================
+  function attachDatabaseListeners(uid) {
+    // User profile listener
+    const userRef = ref(db, `users/${uid}`);
+    const unsubProfile = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        userProfile = snapshot.val();
+        renderUserProfile();
+        updateWalletUI();
+        updateAdUI();
+      }
+    }, (err) => {
+      console.error('[MUMBAI ADS] Profile listener error:', err);
+    });
+    unsubscribers.push(unsubProfile);
+
+    // Wallet transactions listener (last 50)
+    const txRef = query(ref(db, `walletTransactions/${uid}`), orderByChild('createdAt'), limitToLast(50));
+    const unsubTx = onValue(txRef, (snapshot) => {
+      renderTransactions(snapshot);
+    }, (err) => {
+      console.error('[MUMBAI ADS] Transaction listener error:', err);
+    });
+    unsubscribers.push(unsubTx);
+
+    // Withdrawal requests listener
+    const wdRef = query(ref(db, `withdrawalRequests/${uid}`), orderByChild('createdAt'), limitToLast(50));
+    const unsubWd = onValue(wdRef, (snapshot) => {
+      renderWithdrawals(snapshot);
+    }, (err) => {
+      console.error('[MUMBAI ADS] Withdrawal listener error:', err);
+    });
+    unsubscribers.push(unsubWd);
+
+    // Active campaign listener
+    const campRef = query(ref(db, 'campaigns'), orderByChild('status'), equalTo('active'));
+    // Note: Realtime Database does not support .where() directly;
+    // we query by status and pick the first active campaign.
+    const unsubCamp = onValue(ref(db, 'campaigns'), (snapshot) => {
+      if (snapshot.exists()) {
+        const campaigns = snapshot.val();
+        activeCampaign = null;
+        for (const [id, c] of Object.entries(campaigns)) {
+          if (c.status === 'active') {
+            // Check scheduling
+            const now = Date.now();
+            if (c.startDate && now < c.startDate) continue;
+            if (c.endDate && now > c.endDate) continue;
+            activeCampaign = { id, ...c };
+            break;
+          }
+        }
+      } else {
+        activeCampaign = null;
+      }
+      renderAdCard();
+    }, (err) => {
+      console.error('[MUMBAI ADS] Campaign listener error:', err);
+    });
+    unsubscribers.push(unsubCamp);
+  }
+
+  // ============================================================
+  // UI RENDERING
+  // ============================================================
+  function updateWalletUI() {
+    if (!userProfile) return;
+    const bal = userProfile.availableBalance || 0;
+    const reserved = userProfile.reservedBalance || 0;
+    const earned = userProfile.totalEarned || 0;
+    const withdrawn = userProfile.totalWithdrawn || 0;
+
+    $('stat-balance').textContent = formatINR(bal);
+    $('stat-earned').textContent = formatINR(earned);
+    $('wallet-available').textContent = formatINR(bal);
+    $('wallet-reserved').textContent = formatINR(reserved);
+    $('wallet-earned').textContent = formatINR(earned);
+    $('wallet-withdrawn').textContent = formatINR(withdrawn);
+    $('withdraw-available').textContent = formatINR(bal);
+  }
+
+  function updateAdUI() {
+    if (!userProfile) return;
+    const adsToday = userProfile.adsCompletedToday || 0;
+    const maxAds = userProfile.maxAdsPerDay || 3;
+    $('stat-ads-today').textContent = `${adsToday} / ${maxAds}`;
+
+    // Next eligible time
+    const lastCompletion = userProfile.lastAdCompletionAt;
+    const intervalMs = (userProfile.minIntervalHours || 4) * 3600000;
+    if (lastCompletion && (Date.now() - lastCompletion) < intervalMs) {
+      const remaining = intervalMs - (Date.now() - lastCompletion);
+      const hrs = Math.floor(remaining / 3600000);
+      const mins = Math.floor((remaining % 3600000) / 60000);
+      $('stat-next-eligible').textContent = `${hrs}h ${mins}m`;
+      $('view-ad-btn').disabled = true;
+    } else if (adsToday >= maxAds) {
+      $('stat-next-eligible').textContent = 'Limit reached';
+      $('view-ad-btn').disabled = true;
+    } else {
+      $('stat-next-eligible').textContent = 'Ready';
+      $('view-ad-btn').disabled = false;
+    }
+    renderAdCard();
+  }
+
+  function renderAdCard() {
+    const btn = $('view-ad-btn');
+    const title = $('ad-title');
+    const desc = $('ad-desc');
+    const rewardText = $('ad-reward-text');
+
+    if (!activeCampaign) {
+      title.textContent = 'No Active Campaign';
+      desc.textContent = 'There are no active advertisements available at this moment. Please check back later.';
+      rewardText.textContent = 'Rewards are credited after server verification.';
+      btn.disabled = true;
+      btn.querySelector('span').textContent = 'No Ads Available';
+      return;
+    }
+
+    title.textContent = activeCampaign.title || 'Advertisement';
+    desc.textContent = activeCampaign.description || 'Watch this advertisement to earn a reward.';
+    rewardText.textContent = `Earn ${formatINR(activeCampaign.rewardAmount || 100)} per verified view`;
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'Start Advertisement';
+  }
+
+  function renderTransactions(snapshot) {
+    const list = $('reward-tx-list');
+    if (!snapshot.exists()) {
+      list.innerHTML = `<div class="empty-state"><i data-lucide="inbox"></i><p>No reward transactions yet. Complete an ad to earn your first reward.</p></div>`;
+      lucide.createIcons();
+      return;
+    }
+    const txs = [];
+    snapshot.forEach(child => { txs.push({ id: child.key, ...child.val() }); });
+    txs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    list.innerHTML = txs.map(tx => {
+      const isCredit = tx.amount > 0;
+      const icon = isCredit ? 'arrow-down-left' : 'arrow-up-right';
+      const cls = isCredit ? 'credit' : 'debit';
+      const statusCls = (tx.status || 'pending').toLowerCase();
+      return `
+        <div class="tx-item">
+          <div class="tx-icon ${cls}"><i data-lucide="${icon}"></i></div>
+          <div class="tx-info">
+            <div class="tx-title">${escapeHtml(tx.description || (isCredit ? 'Reward Credit' : 'Withdrawal'))}</div>
+            <div class="tx-meta">${formatDateTime(tx.createdAt)}</div>
+            <div class="tx-status ${statusCls}">${escapeHtml(tx.status || 'pending')}</div>
+          </div>
+          <div class="tx-amount ${cls}">${isCredit ? '+' : '-'}${formatINR(Math.abs(tx.amount))}</div>
+        </div>
+      `;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  function renderWithdrawals(snapshot) {
+    const list = $('withdrawal-list');
+    if (!snapshot.exists()) {
+      list.innerHTML = `<div class="empty-state"><i data-lucide="inbox"></i><p>No withdrawal requests yet. Minimum withdrawal is ₹2,000.00.</p></div>`;
+      lucide.createIcons();
+      return;
+    }
+    const wds = [];
+    snapshot.forEach(child => { wds.push({ id: child.key, ...child.val() }); });
+    wds.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    list.innerHTML = wds.map(wd => {
+      const statusCls = (wd.status || 'pending').toLowerCase();
+      const icon = wd.status === 'paid' ? 'check-circle' :
+                   wd.status === 'rejected' ? 'x-circle' :
+                   wd.status === 'approved' ? 'thumbs-up' : 'clock';
+      const cls = wd.status === 'paid' ? 'credit' :
+                  wd.status === 'rejected' ? 'debit' : 'pending';
+      return `
+        <div class="tx-item">
+          <div class="tx-icon ${cls}"><i data-lucide="${icon}"></i></div>
+          <div class="tx-info">
+            <div class="tx-title">${formatINR(wd.amount)} → ${escapeHtml(wd.upiId || '—')}</div>
+            <div class="tx-meta">${formatDateTime(wd.createdAt)}</div>
+            <div class="tx-status ${statusCls}">${escapeHtml(wd.status || 'pending')}</div>
+            ${wd.adminNote ? `<div class="tx-meta" style="margin-top:4px;color:var(--amber-400);">Note: ${escapeHtml(wd.adminNote)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[m]));
+  }
+
+  // ============================================================
+  // AD VIEWING FLOW (Server-Authoritative)
+  // ============================================================
+  async function startAdView() {
+    if (!activeCampaign) {
+      showToast('No active campaign available.', 'error');
+      return;
+    }
+
+    const btn = $('view-ad-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Creating attempt…';
+
+    try {
+      // Step 1: Ask the backend to create a signed, expiring attempt token.
+      // The backend validates eligibility (daily limit, interval, account status)
+      // and returns an opaque attempt reference + tracking URL.
+      const createAttempt = httpsCallable(functions, 'createAdAttempt');
+      const result = await createAttempt({
+        campaignId: activeCampaign.id
+      });
+
+      const { attemptId, trackingUrl, expiresAt } = result.data;
+      if (!attemptId || !trackingUrl) {
+        throw new Error('Backend did not return a valid attempt.');
+      }
+
+      // Step 2: Open the tracking URL in a new tab.
+      // The tracking URL should point to the approved shortener (e.g., UpShrink)
+      // with the attempt token embedded server-side.
+      const win = window.open(trackingUrl, '_blank', 'noopener,noreferrer');
+      if (!win) {
+        showToast('Pop-up blocked. Please allow pop-ups for this site.', 'error');
+        btn.disabled = false;
+        btn.querySelector('span').textContent = 'Start Advertisement';
+        return;
+      }
+
+      // Step 3: Listen for backend verification of this attempt.
+      // The backend credits the reward ONLY after the ad provider's
+      // server-to-server callback confirms completion.
+      listenForAttemptVerification(attemptId);
+
+      showToast('Advertisement opened. Complete it to earn your reward. Verification is pending.', 'info');
+
+    } catch (err) {
+      const msg = handleFirebaseError(err, 'Start Ad');
+      showToast(msg, 'error');
+      btn.disabled = false;
+      btn.querySelector('span').textContent = 'Start Advertisement';
+    }
+  }
+
+  function listenForAttemptVerification(attemptId) {
+    if (attemptListenerActive) return;
+    attemptListenerActive = true;
+
+    const attemptRef = ref(db, `adAttempts/${attemptId}`);
+    const unsub = onValue(attemptRef, (snapshot) => {
+      if (!snapshot.exists()) return;
+      const data = snapshot.val();
+      if (data.verificationStatus === 'verified') {
+        showToast('Reward credited! Your wallet has been updated.', 'success');
+        attemptListenerActive = false;
+        unsub();
+        // The user profile listener will refresh the balance.
+      } else if (data.verificationStatus === 'rejected' || data.verificationStatus === 'expired') {
+        showToast('Ad verification was not successful. No reward was credited.', 'error');
+        attemptListenerActive = false;
+        unsub();
+      }
+      // If 'pending', wait for further updates.
+    }, (err) => {
+      console.error('[MUMBAI ADS] Attempt listener error:', err);
+    });
+
+    unsubscribers.push(unsub);
+    // Auto-cleanup after attempt expiry (default 30 min)
+    setTimeout(() => {
+      if (attemptListenerActive) {
+        attemptListenerActive = false;
+        try { unsub(); } catch(e){}
+      }
+    }, 30 * 60 * 1000);
+  }
+
+  // ============================================================
+  // WITHDRAWAL FLOW
+  // ============================================================
+  function openWithdrawForm() {
+    $('withdraw-modal').classList.add('open');
+    $('wd-amount').value = '';
+    $('wd-upi').value = '';
+    $('wd-holder').value = '';
+    $('wd-mobile').value = '';
+    clearFormErrors();
+    lucide.createIcons();
+  }
+  function closeWithdrawForm() {
+    $('withdraw-modal').classList.remove('open');
+  }
+  function clearFormErrors() {
+    ['wd-amount-error','wd-upi-error','wd-holder-error','wd-mobile-error'].forEach(id => {
+      $(id).classList.remove('show');
+      const input = $(id).previousElementSibling?.previousElementSibling;
+      if (input && input.classList) input.classList.remove('error');
+    });
+    $('withdraw-error').classList.add('hidden');
+  }
+
+  function validateWithdrawalForm() {
+    let valid = true;
+    clearFormErrors();
+
+    const amount = parseFloat($('wd-amount').value);
+    const upi = $('wd-upi').value.trim();
+    const holder = $('wd-holder').value.trim();
+    const mobile = $('wd-mobile').value.trim();
+
+    // Amount: min 2000, max 10000, and not exceeding available balance
+    const available = userProfile?.availableBalance || 0;
+    if (!amount || amount < 2000 || amount > 10000) {
+      $('wd-amount-error').textContent = 'Amount must be between ₹2,000 and ₹10,000.';
+      $('wd-amount-error').classList.add('show');
+      valid = false;
+    } else if (amount > available) {
+      $('wd-amount-error').textContent = `Amount cannot exceed your available balance of ${formatINR(available)}.`;
+      $('wd-amount-error').classList.add('show');
+      valid = false;
+    }
+
+    // UPI ID: identifier@handle — alphanumeric, dots, hyphens, underscores
+    const upiRegex = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z]{2,64}$/;
+    if (!upiRegex.test(upi)) {
+      $('wd-upi-error').classList.add('show');
+      valid = false;
+    }
+
+    // Holder name
+    if (holder.length < 2 || holder.length > 100) {
+      $('wd-holder-error').classList.add('show');
+      valid = false;
+    }
+
+    // Mobile: 10 digits, starts 6-9
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(mobile)) {
+      $('wd-mobile-error').classList.add('show');
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  async function submitWithdrawal(e) {
+    e.preventDefault();
+    if (!validateWithdrawalForm()) return;
+
+    const btn = $('wd-submit-btn');
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Submitting…';
+
+    try {
+      const submitWd = httpsCallable(functions, 'createWithdrawalRequest');
+      const result = await submitWd({
+        amount: parseFloat($('wd-amount').value),
+        upiId: $('wd-upi').value.trim(),
+        accountHolderName: $('wd-holder').value.trim(),
+        mobileNumber: $('wd-mobile').value.trim()
+      });
+
+      closeWithdrawForm();
+      showConfirmation(
+        'Request Submitted',
+        `Your withdrawal request for ${formatINR(result.data.amount)} has been received. Status: Pending review. Request ID: ${result.data.requestId}`
+      );
+      showToast('Withdrawal request submitted successfully.', 'success');
+    } catch (err) {
+      const msg = handleFirebaseError(err, 'Withdrawal');
+      $('withdraw-error-text').textContent = msg;
+      $('withdraw-error').classList.remove('hidden');
+      lucide.createIcons();
+    } finally {
+      btn.disabled = false;
+      btn.querySelector('span').textContent = 'Submit Request';
+    }
+  }
+
+  function showConfirmation(title, message) {
+    $('confirm-title').textContent = title;
+    $('confirm-message').textContent = message;
+    $('confirm-modal').classList.add('open');
+    lucide.createIcons();
+  }
+
+  // ============================================================
+  // NAVIGATION
+  // ============================================================
+  function switchSection(section) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.desktop-nav button').forEach(b => b.classList.remove('active'));
+
+    const target = $('section-' + section);
+    if (target) target.classList.add('active');
+
+    document.querySelectorAll(`.nav-item[data-section="${section}"]`).forEach(n => n.classList.add('active'));
+    document.querySelectorAll(`.desktop-nav button[data-section="${section}"]`).forEach(b => b.classList.add('active'));
+
+    lucide.createIcons();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ============================================================
+  // EVENT LISTENERS
+  // ============================================================
+  function attachEventListeners() {
+    // Auth
+    $('google-sign-in-btn').addEventListener('click', signInWithGoogle);
+    $('sign-out-btn').addEventListener('click', handleSignOut);
+
+    // Settings modal
+    $('settings-btn').addEventListener('click', () => {
+      $('settings-modal').classList.add('open');
+      lucide.createIcons();
+    });
+    $('settings-modal').addEventListener('click', (e) => {
+      if (e.target === $('settings-modal')) $('settings-modal').classList.remove('open');
+    });
+
+    // Settings links
+    $('settings-privacy-btn').addEventListener('click', () => {
+      showToast('Privacy: We collect only your Google account email and name for authentication. No device fingerprints or invasive tracking.', 'info');
+    });
+    $('settings-terms-btn').addEventListener('click', () => {
+      showToast('Terms: Rewards are credited only after server-side ad verification. Abuse results in account suspension.', 'info');
+    });
+    $('settings-support-btn').addEventListener('click', () => {
+      showToast('Support: Contact support@mumbaiads.example for assistance.', 'info');
+    });
+
+    // Withdrawal
+    $('open-withdraw-form-btn').addEventListener('click', openWithdrawForm);
+    $('quick-withdraw-btn').addEventListener('click', () => { switchSection('withdrawals'); openWithdrawForm(); });
+    $('withdraw-modal').addEventListener('click', (e) => {
+      if (e.target === $('withdraw-modal')) closeWithdrawForm();
+    });
+    $('withdraw-form').addEventListener('submit', submitWithdrawal);
+
+    // Confirmation
+    $('confirm-close-btn').addEventListener('click', () => $('confirm-modal').classList.remove('open'));
+    $('confirm-modal').addEventListener('click', (e) => {
+      if (e.target === $('confirm-modal')) $('confirm-modal').classList.remove('open');
+    });
+
+    // Navigation
+    document.querySelectorAll('[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => switchSection(btn.dataset.section));
+    });
+
+    // Ad
+    $('view-ad-btn').addEventListener('click', startAdView);
+
+    // Global error close
+    document.querySelector('#global-error .close')?.addEventListener('click', clearGlobalError);
+
+    // Online/offline
+    window.addEventListener('offline', () => showToast('You are offline. Some features may not work.', 'error'));
+    window.addEventListener('online', () => showToast('Back online.', 'success'));
+  }
+
+  // ============================================================
+  // AUTH STATE OBSERVER
+  // ============================================================
+  onAuthStateChanged(auth, async (user) => {
+    // Clean up previous listeners
+    unsubscribers.forEach(unsub => { try { unsub(); } catch(e){} });
+    unsubscribers = [];
+    attemptListenerActive = false;
+
+    if (user) {
+      currentUser = user;
+      showLoading('Loading your account…');
+
+      // Load or wait for profile
+      const profile = await loadUserProfile(user.uid);
+      if (!profile) {
+        // Profile not found — show a helpful message.
+        // The backend onCreate trigger must create the user record.
+        showGlobalError(
+          'Your account profile is being set up. If this persists, the backend user-creation trigger may not be deployed. Please contact support.'
+        );
+        // We still show the dashboard with limited data.
+        userProfile = {
+          displayName: user.displayName || 'User',
+          email: user.email || '',
+          photoURL: user.photoURL || '',
+          createdAt: Date.now(),
+          availableBalance: 0,
+          reservedBalance: 0,
+          totalEarned: 0,
+          totalWithdrawn: 0,
+          accountStatus: 'active',
+          adsCompletedToday: 0,
+          maxAdsPerDay: 3,
+          minIntervalHours: 4
+        };
+        renderUserProfile();
+        updateWalletUI();
+        updateAdUI();
+      }
+
+      attachDatabaseListeners(user.uid);
+      showDashboard();
+      hideLoading();
+      lucide.createIcons();
+    } else {
+      currentUser = null;
+      userProfile = null;
+      activeCampaign = null;
+      showAuth();
+      hideLoading();
+      lucide.createIcons();
+    }
+  });
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  attachEventListeners();
+  lucide.createIcons();
+
+  // Safety timeout: if Firebase hangs, hide loading after 10s
+  setTimeout(() => {
+    if (!loadingScreen.classList.contains('fade-out')) {
+      hideLoading();
+      if (!auth.currentUser) showAuth();
+      showToast('Connection is slow. Some data may not load.', 'error');
+    }
+  }, 10000);
+
+</script>
+</body>
+</html>
